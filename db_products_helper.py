@@ -92,6 +92,11 @@ def create_db_products_bulk(products: List[ProductCreate]):
         if connection.is_connected():
             cursor = connection.cursor()
 
+            for product in products:
+                cursor.execute("SELECT id FROM categories WHERE id=%s", (product.category_id,))
+                if not cursor.fetchone():
+                    raise HTTPException(status_code=404, detail=f"The category with id {product.category_id} does not exist.")
+
             query = f"""
             INSERT INTO products (name, description, price, stock, category_id) VALUES (%s, %s, %s, %s, %s)
             """
