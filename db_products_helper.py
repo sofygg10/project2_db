@@ -62,7 +62,7 @@ def db_products_get():
             cursor = connection.cursor()
 
             query="""  
-            SELECT p.name, p.description, p.price, p.stock, p.category_id FROM products AS p
+            SELECT p.id, p.name, p.description, p.price, p.stock, p.category_id FROM products AS p
             """
 
             cursor.execute(query)
