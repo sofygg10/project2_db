@@ -94,6 +94,12 @@ def create_db_orders_bulk(orders: List[OrderCreate]):
         if connection.is_connected():
             cursor = connection.cursor()
 
+        
+            for order in orders:
+                cursor.execute("SELECT id FROM customers WHERE id=%s", (order.customer_id,))
+                if not cursor.fetchone():
+                    raise HTTPException(status_code=404, detail=f"Customer ID {order.customer_id} does not exist.")
+
             query = f"""
             INSERT INTO orders (customer_id, total, state) VALUES (%s, %s, %s)
             """
