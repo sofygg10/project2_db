@@ -1,10 +1,49 @@
 import os 
 import mysql.connector
 from mysql.connector import Error
-from models import CustomerCreate
+from models import CategoryCreate
 from typing import List
 
-def db_customers_get (): 
+def create_db_category(category: CategoryCreate):
+    connection = None
+    cursor = None
+
+    try:
+        connection = mysql.connector.connect(
+            host = os.getenv("DB_HOST"),
+            user = os.getenv("DB_USER"),
+            password = os.getenv("DB_PASSWORD"),
+            database = os.getenv("DB_NAME")
+        )
+
+        if connection.is_connected():
+            cursor = connection.cursor()
+
+            query = f"""
+            INSERT INTO categories (name, description) VALUES (%s, %s)
+             """
+
+            VALUES = (category.name, category.description)
+
+            cursor.execute(query, VALUES)
+
+            connection.commit()
+
+    except Error as e:
+        print(f"Error while creating category from database: {e}")
+
+        if connection: 
+            connection.rollback()
+
+    finally:
+        if cursor is not None:
+            cursor.close()
+
+        if connection is not None and connection.is_connected():
+            connection.close()
+
+def db_get_categories ():
+
     connection = None
     cursor = None
 
@@ -20,22 +59,22 @@ def db_customers_get ():
             cursor = connection.cursor()
 
             query="""  
-            SELECT c.id, c.name, c.email, c.phone, c.address, c.created_at FROM customers AS c
+            SELECT c.id, c.name, c.description FROM categories AS c
             """
 
             cursor.execute(query)
 
-            customers = cursor.fetchall()
+            categories = cursor.fetchall()
 
     except Error as e:
-        print(f"Error while getting customers from database: {e}")
+        print(f"Error while getting categories from database: {e}")
 
     finally:
         cursor.close()
         connection.close() 
-        return customers
+        return categories
 
-def create_db_customer(customer_data: CustomerCreate):
+def create_db_categories_bulk(categories: List[CategoryCreate]):
     connection = None
     cursor = None
 
@@ -51,49 +90,11 @@ def create_db_customer(customer_data: CustomerCreate):
             cursor = connection.cursor()
 
             query = f"""
-            INSERT INTO customers (name, email, phone, address) VALUES (%s, %s, %s, %s)
-             """
-
-            VALUES = (customer_data.name, customer_data.email, customer_data.phone, customer_data.address)
-
-            cursor.execute(query, VALUES)
-
-            connection.commit()
-
-    except Error as e:
-        print(f"Error while creating customers from database: {e}")
-
-        if connection: 
-            connection.rollback()
-
-    finally:
-        if cursor is not None:
-            cursor.close()
-
-        if connection is not None and connection.is_connected():
-            connection.close()
-
-def create_db_customers_bulk(customers: List[CustomerCreate]):
-    connection = None
-    cursor = None
-
-    try:
-        connection = mysql.connector.connect(
-            host = os.getenv("DB_HOST"),
-            user = os.getenv("DB_USER"),
-            password = os.getenv("DB_PASSWORD"),
-            database = os.getenv("DB_NAME")
-        )
-
-        if connection.is_connected():
-            cursor = connection.cursor()
-
-            query = f"""
-            INSERT INTO customers (name, email, phone, address) VALUES (%s, %s, %s, %s)
+            INSERT INTO categories (name, description) VALUES (%s, %s)
             """
 
-            for customer in customers:
-                values = (customer.name, customer.email, customer.phone, customer.address)
+            for category in categories:
+                values = (category.name, category.description)
 
                 cursor.execute(query, values)
 
@@ -108,18 +109,9 @@ def create_db_customers_bulk(customers: List[CustomerCreate]):
         return True
 
     except Error as e:
-        print(f"Error while getting customers from database: {e}")
+        print(f"Error while creating categories from database: {e}")
 
         if connection: 
             connection.rollback()
 
         return False
-        
-
-
-
-
-
-
-
-
