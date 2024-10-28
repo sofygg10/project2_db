@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException
-from models import CustomerCreate, CategoryCreate, ProductCreate
+from models import CustomerCreate, CategoryCreate, ProductCreate, OrderCreate
 from db_customers_helper import db_customers_get, create_db_customer, create_db_customers_bulk
 from typing import List 
 from db_category_helper import create_db_category, db_get_categories, create_db_categories_bulk
 from db_products_helper import db_product_create, db_products_get, create_db_products_bulk
+from db_orders_helper import db_order_create, db_orders_get, create_db_orders_bulk
 
 router = APIRouter()
 
@@ -78,6 +79,33 @@ def bulk_products(products: List[ProductCreate]):
         }
     else:
         raise HTTPException(status_code=500, detail="An error occurred while creating products.")
+
+@router.post("/create/order")
+def create_order(order: OrderCreate):
+    db_order_create(order)
+    return {
+        "message": "Order created successfully"
+    }
+
+@router.get("/get/orders/")
+def get_orders():
+    orders = db_orders_get()
+
+    return {
+        "orders" : orders 
+    }
+
+@router.post("/create/orders/bulk")
+def bulk_orders (orders: List[OrderCreate]):
+    if create_db_orders_bulk (orders):
+        return{
+            "message" : "Orders created successfully"
+        }
+    else:
+        raise HTTPException(status_code=500, detail="An error occurred while creating orders.")
+
+
+
 
 
     

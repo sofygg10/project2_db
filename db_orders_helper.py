@@ -1,11 +1,11 @@
 import os 
 import mysql.connector
 from mysql.connector import Error
-from models import ProductCreate
+from models import OrderCreate
 from typing import List
 from fastapi import HTTPException
 
-def db_product_create(product: ProductCreate):
+def db_order_create (order: OrderCreate):
     connection = None
     cursor = None
 
@@ -20,21 +20,22 @@ def db_product_create(product: ProductCreate):
         if connection.is_connected():
             cursor = connection.cursor()
 
-            cursor.execute("SELECT id FROM categories WHERE id=%s", (product.category_id,))
+            cursor.execute("SELECT id FROM customers WHERE id=%s", (order.customer_id,))
             if not cursor.fetchone():
-                raise HTTPException(status_code=404, detail="The category does not exist.")
+                raise HTTPException(status_code=404, detail="The customer does not exist.")
+
             else:
                 query = """
-                INSERT INTO products (name, description, price, stock, category_id) VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO orders (customer_id, total, state) VALUES (%s, %s, %s)
                 """
 
-                values = (product.name, product.description, product.price, product.stock, product.category_id)
+                values = (order.customer_id, order.total, order.state)
 
                 cursor.execute(query, values)
                 connection.commit()
 
     except Error as e:
-        print(f"Error while creating product to database: {e}")
+        print(f"Error while creating order to database: {e}")
 
         if connection: 
             connection.rollback()
@@ -46,7 +47,7 @@ def db_product_create(product: ProductCreate):
         if connection is not None and connection.is_connected():
             connection.close()
 
-def db_products_get():
+def db_orders_get():
     connection = None
     cursor = None
 
@@ -62,7 +63,7 @@ def db_products_get():
             cursor = connection.cursor()
 
             query="""  
-            SELECT p.name, p.description, p.price, p.stock, p.category_id FROM products AS p
+            SELECT o.customer_id, o.total, o.state FROM orders AS o
             """
 
             cursor.execute(query)
@@ -70,14 +71,15 @@ def db_products_get():
             products = cursor.fetchall()
 
     except Error as e:
-        print(f"Error while getting products from database: {e}")
+        print(f"Error while getting orders from database: {e}")
 
     finally:
         cursor.close()
         connection.close() 
         return products
 
-def create_db_products_bulk(products: List[ProductCreate]):
+
+def create_db_orders_bulk(orders: List[OrderCreate]):
     connection = None
     cursor = None
 
@@ -92,24 +94,25 @@ def create_db_products_bulk(products: List[ProductCreate]):
         if connection.is_connected():
             cursor = connection.cursor()
 
-            for product in products:
-                cursor.execute("SELECT id FROM categories WHERE id=%s", (product.category_id,))
+        
+            for order in orders:
+                cursor.execute("SELECT id FROM customers WHERE id=%s", (order.customer_id,))
                 if not cursor.fetchone():
-                    raise HTTPException(status_code=404, detail=f"The category with id {product.category_id} does not exist.")
+                    raise HTTPException(status_code=404, detail=f"Customer ID {order.customer_id} does not exist.")
 
             query = f"""
-            INSERT INTO products (name, description, price, stock, category_id) VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO orders (customer_id, total, state) VALUES (%s, %s, %s)
             """
 
-            for product in products:
-                values = (product.name, product.description, product.price, product.stock, product.category_id)
+            for order in orders:
+                values = (order.customer_id, order.total, order.state)
 
                 cursor.execute(query, values)
 
         connection.commit()
 
     except Error as e:
-        print(f"Error while creating products in bulk: {e}")
+        print(f"Error while creating orders in bulk: {e}")
         if connection:
             connection.rollback()
         return False
@@ -121,6 +124,3 @@ def create_db_products_bulk(products: List[ProductCreate]):
             connection.close()
 
     return True
-
-       
-
