@@ -9,4 +9,11 @@ class CustomerCreate(BaseModel):
 class CategoryCreate(BaseModel):
     name: str
     description: str
+
+class ProductCreate(BaseModel):
+    name: str
+    description: str
+    price: float
+    stock: int
+    category_id: int
     
