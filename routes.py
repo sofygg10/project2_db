@@ -1,11 +1,12 @@
 from fastapi import APIRouter, HTTPException
-from models import CustomerCreate, CategoryCreate, ProductCreate, OrderCreate, OrderItemCreate
+from models import CustomerCreate, CategoryCreate, ProductCreate, OrderCreate, OrderItemCreate, ShippingStateCreate
 from db_customers_helper import db_customers_get, create_db_customer, create_db_customers_bulk
 from typing import List 
 from db_category_helper import create_db_category, db_get_categories, create_db_categories_bulk
 from db_products_helper import db_product_create, db_products_get, create_db_products_bulk
 from db_orders_helper import db_order_create, db_orders_get, create_db_orders_bulk
 from db_order_item_helper import db_order_item_create, db_order_item_get, create_db_order_item_bulk
+from db_shipping_state_helper import db_shipping_state_create, db_shipping_status_get
 
 router = APIRouter()
 
@@ -129,6 +130,26 @@ def order_item_bulk(order_item : List[OrderItemCreate]):
         }
     else:
         raise HTTPException(status_code=500, detail="An error occurred while creating orders item.")
+
+@router.post("/create/shipping-status")
+def create_shipping_status(shipping_state: ShippingStateCreate):
+    db_shipping_state_create(shipping_state)
+    return {
+        "message": "Shipping state created successfully"
+    }
+
+@router.get("/get/shipping-status")
+def get_shipping_status():
+    shipping_status = db_shipping_status_get()
+
+    return {
+        " shipping_status" :  shipping_status
+    }
+
+
+
+
+
 
 
 

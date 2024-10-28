@@ -29,4 +29,9 @@ class OrderItemCreate(BaseModel):
     quantity : int
     price : float
 
+class ShippingStateCreate(BaseModel):
+    order_id : int
+    status: Literal['processing', 'shipped', 'delivered', 'returned'] = 'processing'
+    tracking_number: str
+
     

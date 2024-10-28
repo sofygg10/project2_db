@@ -45,3 +45,12 @@ CREATE TABLE order_item (
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
+
+CREATE TABLE shipping_status (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    status ENUM('processing', 'shipped', 'delivered', 'returned') DEFAULT 'processing',
+    tracking_number VARCHAR(255),
+    FOREIGN KEY (order_id) REFERENCES orders(id)
+);
+
