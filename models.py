@@ -23,6 +23,10 @@ class OrderCreate(BaseModel):
     total: float
     state: Literal['pending', 'completed', 'cancelled'] = 'pending'
 
-
+class OrderItemCreate(BaseModel):
+    order_id : int
+    product_id : int
+    quantity : int
+    price : float
 
     
