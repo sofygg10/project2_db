@@ -76,3 +76,36 @@ def db_shipping_status_get():
         cursor.close()
         connection.close() 
         return products
+
+def db_orders_shipping_status():
+    connection = None
+    cursor = None
+
+    try:
+        connection = mysql.connector.connect(
+            host = os.getenv("DB_HOST"),
+            user = os.getenv("DB_USER"),
+            password = os.getenv("DB_PASSWORD"),
+            database = os.getenv("DB_NAME")
+        )
+
+        if connection.is_connected():
+            cursor = connection.cursor()
+
+            query="""  
+            SELECT o.id AS order_id, o.total AS order_total, s.status AS shipping_status
+            FROM orders o
+            LEFT JOIN shipping_status s ON o.id = s.order_id;
+            """
+
+            cursor.execute(query)
+
+            products = cursor.fetchall()
+
+    except Error as e:
+        print(f"Error while getting shipping status from database: {e}")
+
+    finally:
+        cursor.close()
+        connection.close() 
+        return products

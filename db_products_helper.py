@@ -77,6 +77,105 @@ def db_products_get():
         connection.close() 
         return products
 
+def db_products_categories_get():
+    connection = None
+    cursor = None
+
+    try:
+        connection = mysql.connector.connect(
+            host = os.getenv("DB_HOST"),
+            user = os.getenv("DB_USER"),
+            password = os.getenv("DB_PASSWORD"),
+            database = os.getenv("DB_NAME")
+        )
+
+        if connection.is_connected():
+            cursor = connection.cursor()
+
+            query="""  
+            SELECT p.id AS product_id, p.name AS product_name, c.name AS category_name
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.id;
+            """
+
+            cursor.execute(query)
+
+            products = cursor.fetchall()
+
+    except Error as e:
+        print(f"Error while getting products from database: {e}")
+
+    finally:
+        cursor.close()
+        connection.close() 
+        return products
+
+def db_products_average_price():
+    connection = None
+    cursor = None
+
+    try:
+        connection = mysql.connector.connect(
+            host = os.getenv("DB_HOST"),
+            user = os.getenv("DB_USER"),
+            password = os.getenv("DB_PASSWORD"),
+            database = os.getenv("DB_NAME")
+        )
+
+        if connection.is_connected():
+            cursor = connection.cursor()
+
+            query="""  
+            SELECT AVG(price) AS average_price
+            FROM products;
+            """
+
+            cursor.execute(query)
+
+            products = cursor.fetchall()
+
+    except Error as e:
+        print(f"Error while getting products from database: {e}")
+
+    finally:
+        cursor.close()
+        connection.close() 
+        return products
+
+def db_products_not_ordered():
+    connection = None
+    cursor = None
+
+    try:
+        connection = mysql.connector.connect(
+            host = os.getenv("DB_HOST"),
+            user = os.getenv("DB_USER"),
+            password = os.getenv("DB_PASSWORD"),
+            database = os.getenv("DB_NAME")
+        )
+
+        if connection.is_connected():
+            cursor = connection.cursor()
+
+            query="""  
+            SELECT p.id AS product_id, p.name AS product_name
+            FROM products p
+            LEFT JOIN order_item oi ON p.id = oi.product_id
+            WHERE oi.product_id IS NULL;
+            """
+
+            cursor.execute(query)
+
+            products = cursor.fetchall()
+
+    except Error as e:
+        print(f"Error while getting products from database: {e}")
+
+    finally:
+        cursor.close()
+        connection.close() 
+        return products
+
 def create_db_products_bulk(products: List[ProductCreate]):
     connection = None
     cursor = None

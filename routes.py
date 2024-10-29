@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from models import CustomerCreate, CategoryCreate, ProductCreate, OrderCreate, OrderItemCreate, ShippingStateCreate
-from db_customers_helper import db_customers_get, create_db_customer, create_db_customers_bulk
+from db_customers_helper import db_customers_get, create_db_customer, create_db_customers_bulk, db_customers_get_orders, db_highest_per_customer_get, db_without_orders_get, db_customers_highest_order
 from typing import List 
-from db_category_helper import create_db_category, db_get_categories, create_db_categories_bulk
-from db_products_helper import db_product_create, db_products_get, create_db_products_bulk
-from db_orders_helper import db_order_create, db_orders_get, create_db_orders_bulk
+from db_category_helper import create_db_category, db_get_categories, create_db_categories_bulk, db_get_total_by_category
+from db_products_helper import db_product_create, db_products_get, create_db_products_bulk, db_products_categories_get, db_products_average_price, db_products_not_ordered
+from db_orders_helper import db_order_create, db_orders_get, create_db_orders_bulk, db_most_recent_per_customer
 from db_order_item_helper import db_order_item_create, db_order_item_get, create_db_order_item_bulk
-from db_shipping_state_helper import db_shipping_state_create, db_shipping_status_get
+from db_shipping_state_helper import db_shipping_state_create, db_shipping_status_get, db_orders_shipping_status
 
 router = APIRouter()
 
@@ -145,6 +145,77 @@ def get_shipping_status():
     return {
         " shipping_status" :  shipping_status
     }
+
+
+@router.get("/get/customer-orders")
+def get_customer_orders(customer_id):
+    customer_order = db_customers_get_orders(customer_id)
+    return {
+        "orders" : customer_order
+    }
+
+@router.get("/get/products/categories")
+def get_products_categories():
+    products = db_products_categories_get()
+    return {
+        "Products" : products
+    }
+
+@router.get("/get/orders/highest-per-customer")
+def highest_per_customer():
+    customers = db_highest_per_customer_get()
+    return {
+        "customers" : customers
+    }
+
+@router.get("/get/customers/without-orders")
+def without_orders():
+    customers = db_without_orders_get()
+    return {
+        "customers" : customers
+    }
+
+@router.get("/get/sales/total-by-category")
+def sales_total_by_category ():
+    sales = db_get_total_by_category()
+    return {
+        "sales" : sales
+    }
+
+@router.get("/get/orders/most-recent-per-customer")
+def most_recent_per_customer ():
+    orders = db_most_recent_per_customer()
+    return {
+        "orders" : orders
+    }
+
+@router.get("/get/products/average-price")
+def products_average_price ():
+    average_price = db_products_average_price()
+    return {
+        "average_price" : average_price
+    }
+
+@router.get("/get/orders/shipping_status")
+def orders_shipping_status ():
+    shipping_status = db_orders_shipping_status()
+    return {
+        "shipping_status" : shipping_status
+    }
+
+@router.get("/get/products/not-ordered")
+def products_not_ordered():
+    not_ordered = db_products_not_ordered()
+    return {
+        "not_ordered" : not_ordered
+    }
+@router.get("/get/customers/highest-order")
+def customers_highest_order():
+    customer = db_customers_highest_order()
+    return {
+        "customer" : customer
+    }
+
 
 
 

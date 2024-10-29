@@ -78,6 +78,39 @@ def db_orders_get():
         connection.close() 
         return products
 
+def db_most_recent_per_customer():
+    connection = None
+    cursor = None
+
+    try:
+        connection = mysql.connector.connect(
+            host = os.getenv("DB_HOST"),
+            user = os.getenv("DB_USER"),
+            password = os.getenv("DB_PASSWORD"),
+            database = os.getenv("DB_NAME")
+        )
+
+        if connection.is_connected():
+            cursor = connection.cursor()
+
+            query="""  
+            SELECT o.customer_id, MAX(o.created_at) AS most_recent_order
+            FROM orders o
+            GROUP BY o.customer_id;
+            """
+
+            cursor.execute(query)
+
+            order_item = cursor.fetchall()
+
+    except Error as e:
+        print(f"Error while getting order item from database: {e}")
+
+    finally:
+        cursor.close()
+        connection.close() 
+        return order_item
+
 
 def create_db_orders_bulk(orders: List[OrderCreate]):
     connection = None
